@@ -7,6 +7,7 @@ import _csv
 import datetime
 import prettytable
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 import matplotlib.colors as colors
 from matplotlib import rcParams
 import random

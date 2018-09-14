@@ -1,5 +1,6 @@
 from sys import stdout
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 from csv import DictReader, DictWriter
 
 
