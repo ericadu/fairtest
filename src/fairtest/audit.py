@@ -108,9 +108,7 @@ if __name__ == '__main__':
 
   all_experiments = csv.DictReader(open(settings_filename))
 
-  map(lambda x: run(x), all_experiments)   
-
-  # pool = ThreadPool(num_threads)
-  # pool.map(run, all_experiments)
-  # pool.close() 
-  # pool.join()
+  pool = ThreadPool(num_threads)
+  pool.map(run, all_experiments)
+  pool.close() 
+  pool.join()
