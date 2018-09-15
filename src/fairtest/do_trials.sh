@@ -3,6 +3,12 @@
 N=$1
 DIRPATH=$2
 SETTINGS=$3
-THREADS=$4
 
-python2.7 audit.py -r $N -d $DIRPATH -s $SETTINGS -t $THREADS
+while IFS='' read -r line || [[ -n "$line" ]]; do
+  COUNTER=0
+  while [  $COUNTER -lt $N ]; do
+     python2.7 audit.py -d $DIRPATH -s $line
+     let COUNTER=COUNTER+1 
+  done
+  python2.7 parse_results.py -d $DIRPATH -s $line
+done < "$SETTINGS"

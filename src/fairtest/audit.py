@@ -13,9 +13,7 @@ from fairtest import Testing, train, test, report, DataSource
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--directory', '-d', type=str, default='data/generator/statistical_parity', help='output folder')
-parser.add_argument('--settings', '-s', type=str, default='settings.csv', help='file path for experiment settings')
-parser.add_argument('--runs', '-r', type=int, default=100, help='number of trials')
-parser.add_argument('--threads', '-t', type=int, default=10, help='number of threads')
+parser.add_argument('--settings', '-s', type=str, help='settings split by comma')
 
 def run(settings):
   # Extract Settings
@@ -36,74 +34,60 @@ def run(settings):
   TARGET = 'O'
   output_filename = "{}/output/report_{}_output.csv".format(directory, exp)
 
-  with open(output_filename, 'w') as f:
-    f.write("lower,upper,pval\n")
+  write_output_header = False
+  if not os.path.exists(output_filename):
+    write_output_header = True
+  f = open(output_filename, "a")
 
-    for _ in range(num_trials):
-        # Generate Dataset
-      dataset = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
-      columns = ['X{}'.format(str(i)) for i in range(m)] + ['A', 'O']
-      # quick data processing
+  if write_output_header:
+    f.write('pval,lower,upper\n')
 
-      df = pd.DataFrame(data=dataset, columns=columns)
+    # Generate Dataset
+  dataset = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
+  columns = ['X{}'.format(str(i)) for i in range(m)] + ['A', 'O']
+  # quick data processing
 
-      data_source = DataSource(df)
+  df = pd.DataFrame(data=dataset, columns=columns)
 
-      # Instantiate the experiment
-      inv = Testing(data_source, SENS, TARGET, EXPL, random_state=0)
+  data_source = DataSource(df)
 
-      # Train the classifier
-      train([inv])
+  # Instantiate the experiment
+  inv = Testing(data_source, SENS, TARGET, EXPL, random_state=0)
 
-      # Evaluate on the testing set
-      test([inv])
+  # Train the classifier
+  train([inv])
 
-      # Create the report
-      report([inv], "output_{}".format(exp), OUTPUT_DIR)
+  # Evaluate on the testing set
+  test([inv])
 
-      input_filename = "{}/output/report_output_{}.txt".format(directory, exp)
+  # Create the report
+  report([inv], "output_{}".format(exp), OUTPUT_DIR)
 
-      with open(input_filename, 'rt') as in_file:  # Open file for reading of text data.
-        contents = in_file.read()
-        pval_pattern = "p\-value = \d*\.?\d*e[\-|\+]?\d* ; CORR = \[\-?\d*\.\d*, \-?\d*\.\d*\]"
-        pval_match = re.findall(pval_pattern, contents)
+  input_filename = "{}/output/report_output_{}.txt".format(directory, exp)
 
-        index = len(pval_match) - 1
-        selected = pval_match[index]
+  with open(input_filename, 'rt') as in_file:  # Open file for reading of text data.
+    contents = in_file.read()
+    pval_pattern = "p\-value = \d*\.?\d*e[\-|\+]?\d* ; CORR = \[\-?\d*\.\d*, \-?\d*\.\d*\]"
+    pval_match = re.findall(pval_pattern, contents)
 
-        intervals = re.findall(r'-?\d*\.\d*', selected)
-        pval = re.findall(r'\d*\.?\d*e[\-|\+]\d*', selected)
-        if len(pval) > 0 and len(intervals) > 0:
-            f.write(",".join(intervals + pval) + "\n")
-        else:
-            print(pval)
-            exit()  
+    index = len(pval_match) - 1
+    selected = pval_match[index]
 
-  exp_name, exp_trial = exp.split("-")
-  results_filename = "{}/results/{}_results.csv".format(directory, exp_name)
-  results = pd.read_csv(output_filename)
-  param = settings['parameter']
-  results_columns = [param, 'FP']
-
-  fp_count = results[results.pval < 0.05].count()['pval']
-
-  write_header = False
-  if not os.path.exists(results_filename):
-    write_header = True
-  results_file = open(results_filename, "a")
-
-  if write_header:
-    results_file.write(','.join(results_columns) + '\n')
-
-  results_file.write(','.join([settings[param], str(fp_count)]) + '\n')      
+    intervals = re.findall(r'-?\d*\.\d*', selected)
+    pval = re.findall(r'\d*\.?\d*e[\-|\+]\d*', selected)
+    if len(pval) > 0 and len(intervals) > 0:
+        f.write(",".join(intervals) + "\n")
+    else:
+        print(pval)
+        exit()     
 
 if __name__ == '__main__':
   args = parser.parse_args()
   directory = args.directory
-  settings_filename = args.settings
-  num_trials = int(args.runs)
-  num_threads = int(args.threads)
+  settings_values = args.settings.split(",")
+  settings_labels = ['title','columns','samples','biased','epsilon','proby','proba', 'prob','parameter']
+  if settings_values != settings_labels:
+    settings = dict(zip(settings_labels, settings_values))
+    run(settings)
 
-  all_experiments = csv.DictReader(open(settings_filename))
 
-  map(lambda x: run(x), all_experiments) 
