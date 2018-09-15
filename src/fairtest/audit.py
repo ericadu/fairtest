@@ -6,8 +6,6 @@ import argparse
 import pandas as pd
 from scipy import stats
 import re # import the regular expressions module
-# from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool 
 import statistical_parity_generator as spg
 
 import fairtest.utils.prepare_data as prepare
@@ -108,7 +106,4 @@ if __name__ == '__main__':
 
   all_experiments = csv.DictReader(open(settings_filename))
 
-  pool = ThreadPool(num_threads)
-  pool.map(run, all_experiments)
-  pool.close() 
-  pool.join()
+  map(lambda x: run(x), all_experiments) 
