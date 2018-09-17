@@ -40,7 +40,7 @@ def run(settings):
   f = open(output_filename, "a")
 
   if write_output_header:
-    f.write('pval,lower,upper\n')
+    f.write('lower,upper,pval\n')
 
     # Generate Dataset
   dataset = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
@@ -72,11 +72,11 @@ def run(settings):
 
     index = len(pval_match) - 1
     selected = pval_match[index]
-
     intervals = re.findall(r'-?\d*\.\d*', selected)
     pval = re.findall(r'\d*\.?\d*e[\-|\+]\d*', selected)
+
     if len(pval) > 0 and len(intervals) > 0:
-        f.write(",".join(intervals) + "\n")
+        f.write(",".join(intervals[1:] + [str(float(pval[0]))]) + "\n")
     else:
         print(pval)
         exit()     
