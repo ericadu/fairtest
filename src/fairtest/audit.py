@@ -15,6 +15,24 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--directory', '-d', type=str, default='data/generator/statistical_parity', help='output folder')
 parser.add_argument('--settings', '-s', type=str, help='settings split by comma')
 
+def check_settings(expected, actual):
+  p_biased, p_unbiased = actual[5:7]
+
+  biased = expected[-1]
+  p = p_biased if biased == True else p_unbiased
+  x_corr, a_corr = actual[7:]
+
+  expected_values = [round(i, 1) for i in expected[:6]]
+  actual_values = [round(i, 1) for i in list(actual[:5]) + [p]]
+
+  if expected_values != actual_values:
+    return False
+
+  if (biased and p_biased != 0.5 and round(x_corr, 1) == 0) or (not biased and round(x_corr, 1) != 0):
+      return False
+
+  return True
+
 def run(settings):
   # Extract Settings
   exp = settings['title']
@@ -33,6 +51,14 @@ def run(settings):
   SENS = ['A']
   TARGET = 'O'
   output_filename = "{}/output/report_{}_output.csv".format(directory, exp)
+  validation_filename = "{}/validation/{}.csv".format(directory, exp)
+
+  write_vf_header = False
+  if not os.path.exists(validation_filename):
+    write_vf_header = True
+  vf = open(validation_filename, "a")
+  if write_vf_header:
+    vf.write('m,n,eps,p_y_A,p_a,p_biased,p_unbiased,x_corr,a_corr\n')
 
   write_output_header = False
   if not os.path.exists(output_filename):
@@ -43,12 +69,11 @@ def run(settings):
     f.write('lower,upper,pval\n')
 
     # Generate Dataset
-  dataset = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
-  columns = ['X{}'.format(str(i)) for i in range(m)] + ['A', 'O']
-  # quick data processing
-
-  df = pd.DataFrame(data=dataset, columns=columns)
-
+  df = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
+  validated = spg.validate_dataset(df)
+  checked = check_settings([m, n, eps, p_y_A, p_a, p, biased], validated)
+  vf.write(','.join([str(round(i, 4)) for i in validated]) + '\n')
+  
   data_source = DataSource(df)
 
   # Instantiate the experiment

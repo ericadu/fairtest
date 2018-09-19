@@ -4,6 +4,10 @@ N=$1
 DIRPATH=$2
 SETTINGS=$3
 
+mkdir $DIRPATH/output
+mkdir $DIRPATH/results
+mkdir $DIRPATH/validation
+
 while IFS='' read -r line || [[ -n "$line" ]]; do
   COUNTER=0
   while [  $COUNTER -lt $N ]; do

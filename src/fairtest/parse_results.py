@@ -18,6 +18,18 @@ if __name__ == '__main__':
     output_filename = "{}/output/report_{}_output.csv".format(directory, settings['title'])
     results_filename = "{}/results/{}_results.csv".format(directory, exp_name)
     results = pd.read_csv(output_filename)
+
+    results_filename = "{}/results/{}_results.csv".format(directory, exp_name)
+    validation_results_filename = "{}/results/validation.csv".format(directory, exp_name)
+
+    # Log in overall experiment
+    if True in results.checked.values:
+      checked_true = results.checked.value_counts()[True]
+    else:
+      checked_true = 0
+
+    vrf = open(validation_results_filename, "a")
+    vrf.write("{},{}\n".format(exp, str(checked_true / 100.0)))
     param = settings['parameter']
     results_columns = [param, 'FP']
 
