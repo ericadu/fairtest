@@ -77,9 +77,9 @@ def run(settings):
   # df = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
   # validated = spg.validate_dataset(df)
   # checked = check_settings([m, n, eps, p_y_A, p_a, p, biased], validated)
-  # df = cg.generate_dataset(m, n, biased, delta, p)
-  df = csg.generate_dataset(m, n, biased, eps, delta, p)
-  validated = csg.validate_dataset(df, biased)
+  df = cg.generate_dataset(m, n, biased, delta, p)
+  #df = csg.generate_dataset(m, n, biased, eps, delta, p)
+  validated = cg.validate_dataset(df, biased)
   vf.write(','.join([str(round(i, 4)) for i in validated]) + '\n')
 
   data_source = DataSource(df)
