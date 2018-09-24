@@ -7,6 +7,7 @@ import pandas as pd
 from scipy import stats
 import re # import the regular expressions module
 import statistical_parity_generator as spg
+import counterfactual_generator as cg
 
 import fairtest.utils.prepare_data as prepare
 from fairtest import Testing, train, test, report, DataSource
@@ -40,8 +41,9 @@ def run(settings):
   n = int(settings['samples'])
   biased = False if settings['biased'] == 'False' else True
   eps = float(settings['epsilon'])
-  p_y_A = float(settings['proby'])
-  p_a = float(settings['proba'])
+  delta = float(settings['delta'])
+  # p_y_A = float(settings['proby'])
+  # p_a = float(settings['proba'])
   p = float(settings['prob'])
 
 
@@ -58,7 +60,8 @@ def run(settings):
     write_vf_header = True
   vf = open(validation_filename, "a")
   if write_vf_header:
-    vf.write('m,n,eps,p_y_A,p_a,p_biased,p_unbiased,x_corr,a_corr\n')
+    # vf.write('m,n,eps,p_y_A,p_a,p_biased,p_unbiased,x_corr,a_corr\n')
+    vf.write('m,n,delta,eps\n')
 
   write_output_header = False
   if not os.path.exists(output_filename):
@@ -66,14 +69,17 @@ def run(settings):
   f = open(output_filename, "a")
 
   if write_output_header:
+    # f.write('lower,upper,pval,checked\n')
     f.write('lower,upper,pval\n')
 
     # Generate Dataset
-  df = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
-  validated = spg.validate_dataset(df)
-  checked = check_settings([m, n, eps, p_y_A, p_a, p, biased], validated)
+  # df = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
+  # validated = spg.validate_dataset(df)
+  # checked = check_settings([m, n, eps, p_y_A, p_a, p, biased], validated)
+  df = cg.generate_dataset(m, n, biased, delta, p)
+  validated = cg.validate_dataset(df)
   vf.write(','.join([str(round(i, 4)) for i in validated]) + '\n')
-  
+
   data_source = DataSource(df)
 
   # Instantiate the experiment
@@ -101,6 +107,7 @@ def run(settings):
     pval = re.findall(r'\d*\.?\d*e[\-|\+]\d*', selected)
 
     if len(pval) > 0 and len(intervals) > 0:
+        # f.write(",".join(intervals[1:] + [str(float(pval[0])), str(checked)]) + "\n")
         f.write(",".join(intervals[1:] + [str(float(pval[0]))]) + "\n")
     else:
         print(pval)
@@ -110,7 +117,8 @@ if __name__ == '__main__':
   args = parser.parse_args()
   directory = args.directory
   settings_values = args.settings.split(",")
-  settings_labels = ['title','columns','samples','biased','epsilon','proby','proba', 'prob','parameter']
+  # settings_labels = ['title','columns','samples','biased','epsilon','proby','proba', 'prob','parameter']
+  settings_labels = ['title','columns','samples','biased','delta','epsilon','p','parameter']
   if settings_values != settings_labels:
     settings = dict(zip(settings_labels, settings_values))
     run(settings)

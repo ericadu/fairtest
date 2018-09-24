@@ -10,7 +10,8 @@ if __name__ == '__main__':
   args = parser.parse_args()
   directory = args.directory
   settings_values = args.settings.split(",")
-  settings_labels = ['title','columns','samples','biased','epsilon','proby','proba', 'prob','parameter']
+  settings_labels = ['title','columns','samples','biased','delta','epsilon','p','parameter']
+  #settings_labels = ['title','columns','samples','biased','epsilon','proby','proba', 'prob','parameter']
   if settings_values != settings_labels:
     settings = dict(zip(settings_labels, settings_values))
 
@@ -20,16 +21,16 @@ if __name__ == '__main__':
     results = pd.read_csv(output_filename)
 
     results_filename = "{}/results/{}_results.csv".format(directory, exp_name)
-    validation_results_filename = "{}/results/validation.csv".format(directory, exp_name)
+    # validation_results_filename = "{}/results/validation.csv".format(directory, exp_name)
 
     # Log in overall experiment
-    if True in results.checked.values:
-      checked_true = results.checked.value_counts()[True]
-    else:
-      checked_true = 0
+    # if True in results.checked.values:
+    #   checked_true = results.checked.value_counts()[True]
+    # else:
+    #   checked_true = 0
 
-    vrf = open(validation_results_filename, "a")
-    vrf.write("{},{}\n".format(exp, str(checked_true / 100.0)))
+    # vrf = open(validation_results_filename, "a")
+    # vrf.write("{},{}\n".format(settings['title'], str(checked_true / 100.0)))
     param = settings['parameter']
     results_columns = [param, 'FP']
 
