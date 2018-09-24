@@ -44,7 +44,7 @@ def run(settings):
   delta = float(settings['delta'])
   # p_y_A = float(settings['proby'])
   # p_a = float(settings['proba'])
-  p = float(settings['prob'])
+  p = float(settings['p'])
 
 
   OUTPUT_DIR = "{}/output".format(directory)
