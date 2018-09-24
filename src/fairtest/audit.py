@@ -54,15 +54,15 @@ def run(settings):
   SENS = ['A']
   TARGET = 'O'
   output_filename = "{}/output/report_{}_output.csv".format(directory, exp)
-  validation_filename = "{}/validation/{}.csv".format(directory, exp)
+  # validation_filename = "{}/validation/{}.csv".format(directory, exp)
 
-  write_vf_header = False
-  if not os.path.exists(validation_filename):
-    write_vf_header = True
-  vf = open(validation_filename, "a")
-  if write_vf_header:
-    # vf.write('m,n,eps,p_y_A,p_a,p_biased,p_unbiased,x_corr,a_corr\n')
-    vf.write('m,n,delta,eps,p\n')
+  # write_vf_header = False
+  # if not os.path.exists(validation_filename):
+  #   write_vf_header = True
+  # vf = open(validation_filename, "a")
+  # if write_vf_header:
+  #   # vf.write('m,n,eps,p_y_A,p_a,p_biased,p_unbiased,x_corr,a_corr\n')
+  #   vf.write('m,n,delta,eps,p\n')
 
   write_output_header = False
   if not os.path.exists(output_filename):
@@ -79,8 +79,8 @@ def run(settings):
   # checked = check_settings([m, n, eps, p_y_A, p_a, p, biased], validated)
   df = cg.generate_dataset(m, n, biased, delta, p)
   #df = csg.generate_dataset(m, n, biased, eps, delta, p)
-  validated = cg.validate_dataset(df, biased)
-  vf.write(','.join([str(round(i, 4)) for i in validated]) + '\n')
+  # validated = cg.validate_dataset(df, biased)
+  # vf.write(','.join([str(round(i, 4)) for i in validated]) + '\n')
 
   data_source = DataSource(df)
 
