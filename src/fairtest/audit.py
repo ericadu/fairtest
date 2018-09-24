@@ -8,6 +8,7 @@ from scipy import stats
 import re # import the regular expressions module
 import statistical_parity_generator as spg
 import counterfactual_generator as cg
+import counterfactual_statistical_parity_generator as csg
 
 import fairtest.utils.prepare_data as prepare
 from fairtest import Testing, train, test, report, DataSource
@@ -61,7 +62,7 @@ def run(settings):
   vf = open(validation_filename, "a")
   if write_vf_header:
     # vf.write('m,n,eps,p_y_A,p_a,p_biased,p_unbiased,x_corr,a_corr\n')
-    vf.write('m,n,delta,eps\n')
+    vf.write('m,n,delta,eps,p\n')
 
   write_output_header = False
   if not os.path.exists(output_filename):
@@ -76,8 +77,8 @@ def run(settings):
   # df = spg.generate_dataset(exp, m, n, biased, eps, p_y_A, p_a, p)
   # validated = spg.validate_dataset(df)
   # checked = check_settings([m, n, eps, p_y_A, p_a, p, biased], validated)
-  df = cg.generate_dataset(m, n, biased, delta, p)
-  validated = cg.validate_dataset(df)
+  df = csg.generate_dataset(m, n, biased, delta, p)
+  validated = csg.validate_dataset(df, biased)
   vf.write(','.join([str(round(i, 4)) for i in validated]) + '\n')
 
   data_source = DataSource(df)
@@ -118,7 +119,7 @@ if __name__ == '__main__':
   directory = args.directory
   settings_values = args.settings.split(",")
   # settings_labels = ['title','columns','samples','biased','epsilon','proby','proba', 'prob','parameter']
-  settings_labels = ['title','columns','samples','biased','delta','epsilon','p','parameter']
+  settings_labels = ['title','columns','samples','biased','delta','epsilon','p']
   if settings_values != settings_labels:
     settings = dict(zip(settings_labels, settings_values))
     run(settings)

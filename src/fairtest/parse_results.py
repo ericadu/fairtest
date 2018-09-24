@@ -10,12 +10,15 @@ if __name__ == '__main__':
   args = parser.parse_args()
   directory = args.directory
   settings_values = args.settings.split(",")
-  settings_labels = ['title','columns','samples','biased','delta','epsilon','p','parameter']
+  settings_labels = ['title','columns','samples','biased','delta','epsilon','p']
   #settings_labels = ['title','columns','samples','biased','epsilon','proby','proba', 'prob','parameter']
   if settings_values != settings_labels:
     settings = dict(zip(settings_labels, settings_values))
 
     exp_name, exp_trial = settings['title'].split("-")
+    delta = settings['delta']
+    eps = settings['epsilon']
+    
     output_filename = "{}/output/report_{}_output.csv".format(directory, settings['title'])
     results_filename = "{}/results/{}_results.csv".format(directory, exp_name)
     results = pd.read_csv(output_filename)
@@ -31,8 +34,9 @@ if __name__ == '__main__':
 
     # vrf = open(validation_results_filename, "a")
     # vrf.write("{},{}\n".format(settings['title'], str(checked_true / 100.0)))
-    param = settings['parameter']
-    results_columns = [param, 'FP']
+    # param = settings['parameter']
+    # results_columns = [param, 'FP']
+    results_columns = ['delta', 'epsilon', 'FP']
 
     fp_count = results[results.pval < 0.05].count()['pval']
 
@@ -44,4 +48,4 @@ if __name__ == '__main__':
     if write_header:
       results_file.write(','.join(results_columns) + '\n')
 
-    results_file.write(','.join([settings[param], str(fp_count)]) + '\n')   
+    results_file.write(','.join([str(delta), str(eps), str(fp_count)]) + '\n')   
